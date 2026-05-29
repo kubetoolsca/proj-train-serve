@@ -1,0 +1,171 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - "**"
+      - "!github-pages"
+  pull_request:
+    branches:
+      - main
+      - develop
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: main-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PROJECT_NAME: proj-train-serve
+  PYTHON_VERSION: 3.11
+
+jobs:
+  generate-build-tag:
+    name: Generate Build Tag
+    runs-on: [self-hosted, Linux, X64]
+
+    outputs:
+      tag: ${{ steps.generate.outputs.tag }}
+      branch: ${{ steps.generate.outputs.branch }}
+      short_sha: ${{ steps.generate.outputs.short_sha }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Generate build tag
+        id: generate
+        shell: bash
+        run: |
+          SHORT_SHA="${GITHUB_SHA::7}"
+          if [[ "${GITHUB_REF}" == refs/heads/* ]]; then
+            BRANCH="${GITHUB_REF#refs/heads/}"
+          elif [[ "${GITHUB_REF}" == refs/pull/* ]]; then
+            BRANCH="pull-request"
+          else
+            BRANCH="unknown"
+          fi
+
+          SAFE_BRANCH="$(echo "$BRANCH" | tr '/' '-' | tr '_' '-' | tr '[:upper:]' '[:lower:]')"
+
+          case "$BRANCH" in
+            main)
+              TAG="main-${SHORT_SHA}"
+              ;;
+            develop)
+              TAG="dev-${SHORT_SHA}"
+              ;;
+            feat/*|feature/*|fix/*|bug/*|maint/*|docs/*|ci/*|test/*|research/*|perf/*)
+              ISSUE_ID="$(echo "$BRANCH" | cut -d '/' -f 2 | cut -d '-' -f 1)"
+              TAG="issue-${ISSUE_ID}-${SHORT_SHA}"
+              ;;
+            *)
+              TAG="${SAFE_BRANCH}-${SHORT_SHA}"
+              ;;
+          esac
+
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "branch=$BRANCH" >> $GITHUB_OUTPUT
+          echo "short_sha=$SHORT_SHA" >> $GITHUB_OUTPUT
+
+          echo "Generated Tag: $TAG"
+          echo "Branch: $BRANCH"
+          echo "Short SHA: $SHORT_SHA"
+
+
+  docs-check:
+    name: Docs Check
+    runs-on: [self-hosted, Linux, X64]
+    needs: [generate-build-tag]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check required docs
+        shell: bash
+        run: |
+          test -f README.md
+          test -f CONTRIBUTING.md
+          test -f CHANGELOG.md
+          test -f pyproject.toml
+
+
+  lint-and-format:
+    name: Lint and Format Check
+    runs-on: [self-hosted, Linux, X64]
+    needs: [generate-build-tag]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check uv
+        run: |
+          uv --version
+
+      - name: Install dependencies
+        run: |
+          uv sync --dev
+
+      - name: Ruff lint
+        run: |
+          uv run ruff check .
+
+      - name: Ruff format check
+        run: |
+          uv run ruff format --check .
+
+  unit-tests:
+    name: Unit Tests
+    runs-on: [self-hosted, Linux, X64]
+    needs: [generate-build-tag]
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check uv
+        run: uv --version
+
+      - name: Install dependencies
+        run: uv sync --dev
+
+      - name: Run tests
+        run: uv run pytest -vv
+
+
+  yaml-lint:
+    name: YAML Lint
+    runs-on: [self-hosted, Linux, X64]
+    needs: [generate-build-tag]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          uv sync --dev
+
+      - name: Run yamllint
+        run: |
+          uv run yamllint .
+
+  docker-runner-check:
+    name: Docker Runner Check
+    runs-on: [self-hosted, Linux, X64, docker]
+    needs: [generate-build-tag]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check Docker
+        run: |
+          docker version

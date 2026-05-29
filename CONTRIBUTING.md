@@ -329,3 +329,14 @@ Examples:
 
 ---
 
+## 13. Skipping CI
+
+GitHub Actions supports skipping `push` and `pull_request` workflows when the commit message contains one of these tokens:
+
+```text
+[skip ci]
+[ci skip]
+[no ci]
+[skip actions]
+[actions skip]
+```

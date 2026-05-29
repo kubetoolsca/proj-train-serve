@@ -145,7 +145,6 @@ proj-train-serve/
 ├── .github/
 │   ├── workflows/
 │   │   └── ci.yaml
-│   └── pull_request_template.md
 ├── docs/
 │   ├── architecture.md
 │   ├── project-plan.md

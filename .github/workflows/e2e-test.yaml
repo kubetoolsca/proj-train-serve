@@ -1,0 +1,67 @@
+name: E2E Test Pipeline
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "E2E target to test"
+        required: true
+        default: "local"
+        type: choice
+        options:
+          - local
+          - docker-compose
+          - aks
+          - eks
+
+      test_suite:
+        description: "E2E test suite"
+        required: true
+        default: "smoke"
+        type: choice
+        options:
+          - smoke
+          - training
+          - serving
+          - full
+
+concurrency:
+  group: e2e-${{ github.ref }}-${{ inputs.target || 'local' }}-${{ inputs.test_suite || 'smoke' }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+run-name: E2E Test Pipeline (${{ inputs.target || 'local' }} / ${{ inputs.test_suite || 'smoke' }})
+
+env:
+  PROJECT_NAME: proj-train-serve
+  PYTHON_VERSION: "3.11"
+  E2E_TARGET: ${{ inputs.target || 'local' }}
+  E2E_TEST_SUITE: ${{ inputs.test_suite || 'smoke' }}
+
+jobs:
+  e2e-placeholder:
+    name: E2E Placeholder
+    runs-on: [self-hosted, Linux, X64]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Print E2E context
+        run: |
+          echo "Project: $PROJECT_NAME"
+          echo "Target: $E2E_TARGET"
+          echo "Suite: $E2E_TEST_SUITE"
+
+      - name: Run E2E tests if available
+        run: |
+          if [ -d "tests/e2e" ]; then
+            uv --version
+            uv sync --dev
+            uv run pytest tests/e2e -vv
+          else
+            echo "tests/e2e does not exist yet."
+            echo "E2E pipeline is ready but no E2E tests are implemented yet."
+          fi
