@@ -174,7 +174,3 @@ CONTRIBUTING.md
 
 before creating branches or pull requests.
 ```
-
-
-
-

@@ -45,3 +45,4 @@ datasets/
 # Secrets
 .env
 *.secret
+venv-proj-serving/

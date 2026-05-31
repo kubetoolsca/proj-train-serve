@@ -110,7 +110,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          uv sync --dev
+          uv sync --dev --python 3.11
 
       - name: Ruff lint
         run: |
@@ -134,7 +134,7 @@ jobs:
         run: uv --version
 
       - name: Install dependencies
-        run: uv sync --dev
+        run: uv sync --dev --python 3.11
 
       - name: Run tests
         run: uv run pytest -vv
@@ -151,7 +151,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          uv sync --dev
+          uv sync --dev --python 3.11
 
       - name: Run yamllint
         run: |
