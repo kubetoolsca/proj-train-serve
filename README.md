@@ -170,6 +170,31 @@ Input: [batch_size, 1, 28, 28]
 Output: raw logits [batch_size, 10]
 ```
 
+### Training Command
+
+```bash
+uv run python -m src.image_classifier.train \
+    --data-dir data \
+    --output-dir outputs \
+    --batch-size 64 \
+    --learning-rate 0.001 \
+    --epochs 5 \
+    --num-workers 2 \
+    --seed 42
+```
+
+### Output Artifacts
+
+Each training run creates:
+
+```text
+outputs/
+└── runs/
+    └── <run-id>/
+        ├── config.json      # hyperparameters and device
+        ├── metrics.json     # final_train_loss, final_test_loss, final_test_accuracy
+        └── model.pt         # state_dict only
+```
 ## Branching Model
 
 ```text
