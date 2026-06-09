@@ -195,6 +195,18 @@ outputs/
         ├── metrics.json     # final_train_loss, final_test_loss, final_test_accuracy
         └── model.pt         # state_dict only
 ```
+
+### Running Tests
+
+```bash
+uv sync --dev --group ml
+uv run pytest -vv
+```
+
+Tests use synthetic data and do not download the full Fashion-MNIST dataset.
+
+---
+
 ## Branching Model
 
 ```text
