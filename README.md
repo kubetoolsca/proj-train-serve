@@ -109,6 +109,104 @@ uv run ruff format --check .
 
 ---
 
+## Local Training — Fashion-MNIST
+
+### What is Fashion-MNIST?
+
+Fashion-MNIST is a dataset of Zalando article images. It contains 60,000 training and 10,000 test grayscale images across 10 clothing categories.
+
+### Image and Output Shapes
+
+```text
+Single image shape:  [1, 28, 28]   (channels, height, width)
+Batch shape:         [batch_size, 1, 28, 28]
+Model output:        [batch_size, 10]   (raw logits, one per class)
+```
+
+The 10 output values are **raw logits** (unnormalized scores). Softmax is **not** applied inside the model. To get probabilities, apply `torch.softmax(logits, dim=1)` externally.
+
+### The 10 Classes
+
+```text
+0: T-shirt/top    5: Sandal
+1: Trouser        6: Shirt
+2: Pullover       7: Sneaker
+3: Dress          8: Bag
+4: Coat           9: Ankle boot
+```
+
+### CNN Architecture
+
+```text
+Input: [batch_size, 1, 28, 28]
+        │
+        ▼
+┌───────────────────────┐
+│ Conv2d(1→32, 3×3, p1) │
+│ ReLU                  │
+│ MaxPool2d(2)          │
+│ → [batch_size, 32, 14, 14]
+└───────────────────────┘
+        │
+        ▼
+┌───────────────────────┐
+│ Conv2d(32→64, 3×3, p1)│
+│ ReLU                  │
+│ MaxPool2d(2)          │
+│ → [batch_size, 64, 7, 7]
+└───────────────────────┘
+        │
+        ▼
+┌───────────────────────┐
+│ Flatten               │
+│ → [batch_size, 3136]  │
+│ Linear(3136→128)      │
+│ ReLU                  │
+│ Linear(128→10)        │
+│ → [batch_size, 10]    │
+└───────────────────────┘
+        │
+        ▼
+Output: raw logits [batch_size, 10]
+```
+
+### Training Command
+
+```bash
+uv run python -m src.image_classifier.train \
+    --data-dir data \
+    --output-dir outputs \
+    --batch-size 64 \
+    --learning-rate 0.001 \
+    --epochs 5 \
+    --num-workers 2 \
+    --seed 42
+```
+
+### Output Artifacts
+
+Each training run creates:
+
+```text
+outputs/
+└── runs/
+    └── <run-id>/
+        ├── config.json      # hyperparameters and device
+        ├── metrics.json     # final_train_loss, final_test_loss, final_test_accuracy
+        └── model.pt         # state_dict only
+```
+
+### Running Tests
+
+```bash
+uv sync --dev --group ml
+uv run pytest -vv
+```
+
+Tests use synthetic data and do not download the full Fashion-MNIST dataset.
+
+---
+
 ## Branching Model
 
 ```text
