@@ -64,6 +64,10 @@ indent-style = "space"
 testpaths = ["tests"]
 pythonpath = ["."]
 addopts = "-ra --strict-markers"
+filterwarnings = [
+  "ignore::UserWarning:lightning.*",
+  "ignore::DeprecationWarning:lightning.*",
+]
 
 [tool.coverage.run]
 source = ["src"]
