@@ -74,7 +74,7 @@ def train(args):
     trainer.fit(model, datamodule=dm)
     trainer.test(model, datamodule=dm)
 
-    # save final metrics 
+    # save final metrics
     metrics = {}
     for key, value in trainer.callback_metrics.items():
         metrics[key] = value.item() if hasattr(value, "item") else value

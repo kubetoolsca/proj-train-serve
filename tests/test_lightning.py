@@ -6,6 +6,7 @@ from torch.utils.data import DataLoader, TensorDataset
 from src.image_classifier.pytorch.data_module import FashionMNISTDataModule
 from src.image_classifier.pytorch.lightning_module import FashionMNISTClassifier
 
+
 # Helpers
 def _make_synthetic_loader(n=32, batch_size=8):
     """Return a DataLoader with random Fashion-MNIST–shaped data."""

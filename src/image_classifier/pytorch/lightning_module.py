@@ -66,7 +66,6 @@ class FashionMNISTClassifier(L.LightningModule):
         self.log("test_loss", loss)
         self.log("test_acc", self.test_acc, on_step=False, on_epoch=True)
 
-
     # Optimizer
     def configure_optimizers(self):
         return __import__("torch").optim.Adam(

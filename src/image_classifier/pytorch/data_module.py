@@ -31,7 +31,6 @@ class FashionMNISTDataModule(L.LightningDataModule):
         self.val_ds = None
         self.test_ds = None
 
-
     # Lightning hooks
     def prepare_data(self):
         """Download dataset (called on rank-0 only)."""
