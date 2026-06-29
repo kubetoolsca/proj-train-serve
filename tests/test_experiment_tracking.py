@@ -79,7 +79,7 @@ def test_config_json_writing(tmp_path):
     loaded = json.loads(config_path.read_text())
 
     expected_keys = {
-        'data_dir',
+        "data_dir",
         "dataset",
         "framework",
         "model",
