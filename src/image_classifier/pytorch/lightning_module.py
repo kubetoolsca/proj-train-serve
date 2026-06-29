@@ -1,8 +1,8 @@
 """Lightning Module for Fashion-MNIST classification."""
 
 import lightning as L
-import torch.nn as nn
 import torch
+import torch.nn as nn
 import torchmetrics
 
 from ..model import SimpleCNN
