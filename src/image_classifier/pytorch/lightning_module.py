@@ -2,6 +2,7 @@
 
 import lightning as L
 import torch.nn as nn
+import torch
 import torchmetrics
 
 from ..model import SimpleCNN
@@ -40,6 +41,7 @@ class FashionMNISTClassifier(L.LightningModule):
 
         self.log("train_loss", loss, prog_bar=True)
         self.log("train_acc", self.train_acc, on_step=False, on_epoch=True, prog_bar=True)
+        self.log("learning_rate", self.hparams.learning_rate)
         return loss
 
     # Validation
@@ -68,7 +70,7 @@ class FashionMNISTClassifier(L.LightningModule):
 
     # Optimizer
     def configure_optimizers(self):
-        return __import__("torch").optim.Adam(
+        return torch.optim.Adam(
             self.parameters(),
             lr=self.hparams.learning_rate,
         )

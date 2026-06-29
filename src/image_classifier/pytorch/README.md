@@ -64,35 +64,100 @@ uv run python -m src.image_classifier.pytorch.train \
     --batch-size 64 \
     --learning-rate 0.001 \
     --epochs 5 \
-    --num-workers 2 \
-    --seed 42
+    --num-workers 0 \
+    --seed 42 \
+    --run-name fashion-mnist-lightning \
+    --accelerator cpu \
+    --devices 1
 ```
+
+### CLI Options
+
+| Flag               | Default                      | Description                          |
+|--------------------|------------------------------|--------------------------------------|
+| `--data-dir`       | `data`                       | Dataset download directory           |
+| `--output-dir`     | `outputs`                    | Root directory for run artifacts     |
+| `--batch-size`     | `64`                         | Training batch size                  |
+| `--learning-rate`  | `0.001`                      | Adam learning rate                   |
+| `--epochs`         | `5`                          | Number of training epochs            |
+| `--num-workers`    | `0`                          | DataLoader worker processes          |
+| `--seed`           | `42`                         | Random seed for reproducibility      |
+| `--run-name`       | `fashion-mnist-lightning`    | Suffix for the run directory name    |
+| `--accelerator`    | `cpu`                        | Lightning accelerator (cpu/gpu)    |
+| `--devices`        | `1`                          | Number of devices to use             |
 
 ---
 
-## Output Structure
+## Experiment Tracking
 
-Each run creates:
+Every training run creates a unique directory with a structured artifact layout:
 
 ```text
 outputs/
 └── runs/
     └── <run-id>/
-        ├── config.json          # hyperparameters
-        ├── metrics.json         # final train/val/test metrics
-        ├── checkpoints/         # Lightning .ckpt files
-        │   └── best-epoch=XX-val_loss=X.XXXX.ckpt
-        └── tensorboard/        # TensorBoard event files
+        ├── config.json          # full training configuration
+        ├── metrics.json         # best_val_loss, best_val_accuracy, final_test_loss, final_test_accuracy
+        ├── run_metadata.json    # git commit, branch, python/torch/lightning versions
+        ├── checkpoints/
+        │   ├── best.ckpt        # best model (lowest val_loss)
+        │   └── last.ckpt        # latest checkpoint at end of training
+        └── tensorboard/         # TensorBoard event files
+```
+
+The `<run-id>` format is: `YYYY-MM-DD-HHMMSS-<run-name>`
+
+Example: `2026-06-17-120530-fashion-mnist-lightning`
+
+### Logged Metrics
+
+The following metrics are logged to TensorBoard:
+
+```text
+train_loss
+val_loss
+val_acc (val_accuracy)
+test_loss
+test_acc (test_accuracy)
+learning_rate
 ```
 
 ### Checkpoints
 
-The `ModelCheckpoint` callback saves the best model (lowest `val_loss`) under `checkpoints/`.
+Two `ModelCheckpoint` callbacks save:
+
+- `best.ckpt` — best model checkpoint (lowest `val_loss`)
+- `last.ckpt` — latest checkpoint at the end of training
+
+### Run Metadata
+
+`run_metadata.json` captures environment details for reproducibility:
+
+```json
+{
+  "run_id": "2026-06-17-120530-fashion-mnist-lightning",
+  "created_at": "2026-06-17T12:05:30+00:00",
+  "git_commit": "abc1234...",
+  "git_branch": "feat/experiment-tracking",
+  "git_is_dirty": false,
+  "python_version": "3.11.9",
+  "torch_version": "2.3.0",
+  "lightning_version": "2.3.0"
+}
+```
+
+If git is not available (no binary, not a repo, CI detached HEAD), git fields default to `null` and training continues normally.
 
 ### TensorBoard
 
-Launch TensorBoard to view training curves:
+Launch TensorBoard to view training curves across all runs:
 
 ```bash
-tensorboard --logdir outputs/runs/<run-id>/tensorboard
+uv run tensorboard --logdir outputs/runs
+```
+
+Or for a specific run:
+
+```bash
+uv run tensorboard --logdir outputs/runs/<run-id>/tensorboard
 ```
