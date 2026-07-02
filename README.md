@@ -207,6 +207,46 @@ Tests use synthetic data and do not download the full Fashion-MNIST dataset.
 
 ---
 
+## Lightning Training — Fashion-MNIST
+
+The project also includes a **PyTorch Lightning** training path under `src/image_classifier/pytorch/`. Lightning wraps the same `SimpleCNN` model with cleaner training structure, automatic checkpointing, TensorBoard logging, and `torchmetrics` integration.
+
+See [src/image_classifier/pytorch/README.md](src/image_classifier/pytorch/README.md) for full details on architecture, DataModule, and LightningModule design.
+
+### Lightning Training Command
+
+```bash
+uv run python -m src.image_classifier.pytorch.train \
+    --data-dir data \
+    --output-dir outputs \
+    --batch-size 64 \
+    --learning-rate 0.001 \
+    --epochs 5 \
+    --num-workers 2 \
+    --seed 42
+```
+
+### Lightning Output Artifacts
+
+```text
+outputs/
+└── runs/
+    └── <run-id>/
+        ├── config.json
+        ├── metrics.json
+        ├── checkpoints/
+        │   └── best-epoch=XX-val_loss=X.XXXX.ckpt
+        └── tensorboard/
+```
+
+### TensorBoard
+
+```bash
+tensorboard --logdir outputs/runs/<run-id>/tensorboard
+```
+
+---
+
 ## Branching Model
 
 ```text

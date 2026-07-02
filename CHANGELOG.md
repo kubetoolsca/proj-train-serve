@@ -19,6 +19,11 @@
 - Lightweight unit tests: `test_data`, `test_model`, `test_training`.
 - CI updated to install `ml` dependency group for tests.
 - README documentation for Fashion-MNIST training.
+- `FashionMNISTDataModule` for Lightning data loading with train/val/test splits.
+- `FashionMNISTClassifier` LightningModule wrapping `SimpleCNN` with `torchmetrics`.
+- Lightning training CLI with `ModelCheckpoint` and `TensorBoardLogger`.
+- Lightning tests including `fast_dev_run` integration test.
+- PyTorch Lightning README under `src/image_classifier/pytorch/`.
 
 ### Changed
 
