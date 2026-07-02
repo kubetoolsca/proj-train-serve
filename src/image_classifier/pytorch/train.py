@@ -25,9 +25,11 @@ def train(args):
 
     # save config
     config = {
+        "data_dir": args.data_dir,
         "batch_size": args.batch_size,
         "learning_rate": args.learning_rate,
         "epochs": args.epochs,
+        "num_workers": args.num_workers,
         "seed": args.seed,
         "framework": "lightning",
     }
@@ -40,6 +42,7 @@ def train(args):
         data_dir=args.data_dir,
         batch_size=args.batch_size,
         num_workers=args.num_workers,
+        seed=args.seed,
     )
 
     # model
@@ -72,12 +75,13 @@ def train(args):
 
     # fit + test
     trainer.fit(model, datamodule=dm)
-    trainer.test(model, datamodule=dm)
+    trainer.test(model, datamodule=dm, ckpt_path="best")
 
     # save final metrics
     metrics = {}
     for key, value in trainer.callback_metrics.items():
-        metrics[key] = value.item() if hasattr(value, "item") else value
+        if key in {"val_loss", "val_acc", "test_loss", "test_acc"}:
+            metrics[key] = value.item() if hasattr(value, "item") else value
 
     with open(run_dir / "metrics.json", "w") as f:
         json.dump(metrics, f, indent=2)

@@ -1,6 +1,7 @@
 """Lightning Module for Fashion-MNIST classification."""
 
 import lightning as L
+import torch
 import torch.nn as nn
 import torchmetrics
 
@@ -68,7 +69,7 @@ class FashionMNISTClassifier(L.LightningModule):
 
     # Optimizer
     def configure_optimizers(self):
-        return __import__("torch").optim.Adam(
+        return torch.optim.Adam(
             self.parameters(),
             lr=self.hparams.learning_rate,
         )

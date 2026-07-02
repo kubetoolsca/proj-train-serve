@@ -1,6 +1,7 @@
 """Lightning DataModule for Fashion-MNIST."""
 
 import lightning as L
+import torch
 from torch.utils.data import DataLoader, random_split
 from torchvision import datasets, transforms
 
@@ -17,6 +18,7 @@ class FashionMNISTDataModule(L.LightningDataModule):
         data_dir: str = "data",
         batch_size: int = 64,
         num_workers: int = 2,
+        seed: int = 42,
     ):
         super().__init__()
         self.save_hyperparameters()
@@ -24,6 +26,7 @@ class FashionMNISTDataModule(L.LightningDataModule):
         self.data_dir = data_dir
         self.batch_size = batch_size
         self.num_workers = num_workers
+        self.seed = seed
 
         self.transform = transforms.ToTensor()
 
@@ -46,7 +49,10 @@ class FashionMNISTDataModule(L.LightningDataModule):
                 download=False,
                 transform=self.transform,
             )
-            self.train_ds, self.val_ds = random_split(full_train, [50_000, 10_000])
+            generator = torch.Generator().manual_seed(self.seed)
+            self.train_ds, self.val_ds = random_split(
+                full_train, [50_000, 10_000], generator=generator
+            )
 
         if stage == "test" or stage is None:
             self.test_ds = datasets.FashionMNIST(
