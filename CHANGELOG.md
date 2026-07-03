@@ -4,6 +4,15 @@
 
 ### Added
 
+- Readable run-ID format (`YYYY-MM-DD-HHMMSS-<run-name>`).
+- `run_metadata.json` with git commit, branch, dirty status, and environment versions.
+- `best.ckpt` and `last.ckpt` checkpoint naming (no epoch/metric suffixes).
+- `--run-name`, `--accelerator`, `--devices` CLI arguments for Lightning training.
+- `learning_rate` logging to TensorBoard.
+- Spec-compliant `metrics.json` keys (`best_val_loss`, `best_val_accuracy`, `final_test_loss`, `final_test_accuracy`).
+- Expanded `config.json` with `dataset`, `model`, `accelerator`, `devices` fields.
+- Experiment tracking tests (`test_experiment_tracking.py`).
+
 - Initial repository foundation.
 - Contribution guidelines.
 - Branching and release rules.
