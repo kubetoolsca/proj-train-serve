@@ -222,27 +222,36 @@ uv run python -m src.image_classifier.pytorch.train \
     --batch-size 64 \
     --learning-rate 0.001 \
     --epochs 5 \
-    --num-workers 2 \
-    --seed 42
+    --num-workers 0 \
+    --seed 42 \
+    --run-name fashion-mnist-lightning \
+    --accelerator cpu \
+    --devices 1
 ```
 
 ### Lightning Output Artifacts
+
+Each run creates a unique directory with a readable ID (e.g. `2026-07-02-120530-fashion-mnist-lightning`):
 
 ```text
 outputs/
 └── runs/
     └── <run-id>/
-        ├── config.json
-        ├── metrics.json
+        ├── config.json          # training hyperparameters
+        ├── metrics.json         # best val + final test metrics
+        ├── run_metadata.json    # git commit, branch, python/torch versions
         ├── checkpoints/
-        │   └── best-epoch=XX-val_loss=X.XXXX.ckpt
-        └── tensorboard/
+        │   ├── best.ckpt        # best model (lowest val_loss)
+        │   └── last.ckpt        # latest checkpoint
+        └── tensorboard/         # TensorBoard event files
 ```
+
+See [src/image_classifier/pytorch/README.md](src/image_classifier/pytorch/README.md) for full experiment tracking documentation.
 
 ### TensorBoard
 
 ```bash
-tensorboard --logdir outputs/runs/<run-id>/tensorboard
+uv run tensorboard --logdir outputs/runs
 ```
 
 ---
